@@ -8,7 +8,7 @@ import {asyncHandler} from "../utils/asyncHandler.js"
 
 const toggleSubscription = asyncHandler(async (req, res) => {
     const {channelId} = req.params
-    if(!channelId?.trim()){
+    if(!channelId?.trim() || !mongoose.isValidObjectId(channelId)){
         throw new ApiError(404, "channel not found");
     }
     const user = req.user?._id;
@@ -45,7 +45,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 // controller to return subscriber list of a channel
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     const {channelId} = req.params
-    if(!channelId.trim()){
+    if(!channelId.trim() || !mongoose.isValidObjectId(channelId)){
         throw new ApiError(404, "Channel not found");
     }
     const subscribers = await Subscription.find({channel: channelId}).populate('subscriber', 'username');
@@ -69,7 +69,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 // controller to return channel list to which user has subscribed
 const getSubscribedChannels = asyncHandler(async (req, res) => {
     const { subscriberId } = req.params
-    if(!subscriberId){
+    if(!subscriberId || !mongoose.isValidObjectId(subscriberId)){
         throw new ApiError(404, "subscriberId not found");
     }
     const subscribedChannels = await Subscription.find({subscriber: subscriberId}).populate('channel', 'username');
@@ -77,7 +77,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
     return res
     .status(200)
     .json(
-            new ApiResponse(200, subscribedChannels, "subscribed channels fetched successfully")
+        new ApiResponse(200, subscribedChannels, "subscribed channels fetched successfully")
     )
 })
 
