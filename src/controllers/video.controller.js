@@ -171,6 +171,28 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params
+    if(!isValidObjectId(videoId) || !videoId){
+        throw new ApiError(404, "video not found")
+    }
+    const video = await Video.findById(videoId)
+    if(req.user?._id.toString() !== video.owner.toString()){
+        throw new ApiError(400, "UnAuthorized Access to toggleVideoPublishStatus")
+    }
+    const isVideoPublished = video.isPublished;
+    const publishDetails = await Video.findByIdAndUpdate(
+        videoId,
+        {
+            $set: {
+                isPublished: !isVideoPublished
+            }
+        },
+        {new: true}
+    )
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, publishDetails, "toggleVideoPublishStatus changed successfully")
+    )
 })
 
 export {
